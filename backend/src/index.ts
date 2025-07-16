@@ -9,9 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(routes);
-
+console.log("Conectando ao MongoDB:", process.env.MONGO_URI);
 mongoose
-  .connect(process.env.MONGODB_URI || "")
+  .connect(process.env.MONGO_URI || "")
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
