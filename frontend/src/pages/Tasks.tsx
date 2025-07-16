@@ -26,6 +26,7 @@ export default function Tasks() {
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+
     const response = await api.post(
       "/tasks",
       { title: newTask, completed: false },
@@ -35,8 +36,33 @@ export default function Tasks() {
         },
       }
     );
+
     setTasks([...tasks, response.data]);
     setNewTask("");
+  };
+
+  const completeTask = async (taskId: string) => {
+    const token = localStorage.getItem("token");
+    const response = await api.patch(
+      `/tasks/${taskId}`,
+      { completed: true },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setTasks(tasks.map((task) => (task._id === taskId ? response.data : task)));
+  };
+
+  const deleteTask = async (taskId: string) => {
+    const token = localStorage.getItem("token");
+    await api.delete(`/tasks/${taskId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setTasks(tasks.filter((task) => task._id !== taskId));
   };
 
   const handleLogout = () => {
@@ -51,7 +77,6 @@ export default function Tasks() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-xl mx-auto bg-white shadow-md p-6 rounded">
-        {/* Header com título e botão de logout */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Minhas Tarefas</h2>
           <button
@@ -62,7 +87,6 @@ export default function Tasks() {
           </button>
         </div>
 
-        {/* Formulário de criação */}
         <form onSubmit={createTask} className="flex gap-2 mb-6">
           <input
             type="text"
@@ -80,7 +104,6 @@ export default function Tasks() {
           </button>
         </form>
 
-        {/* Lista de tarefas */}
         <ul className="space-y-2">
           {tasks.map((task) => (
             <li
@@ -92,13 +115,23 @@ export default function Tasks() {
               >
                 {task.title}
               </span>
-              <span
-                className={`text-sm px-2 py-1 rounded ${
-                  task.completed ? "bg-green-200" : "bg-yellow-200"
-                }`}
-              >
-                {task.completed ? "Feita" : "Pendente"}
-              </span>
+
+              <div className="flex gap-2">
+                {!task.completed && (
+                  <button
+                    onClick={() => completeTask(task._id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                  >
+                    Completar
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteTask(task._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                >
+                  X
+                </button>
+              </div>
             </li>
           ))}
         </ul>
