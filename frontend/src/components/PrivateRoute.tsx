@@ -1,9 +1,16 @@
 import type { JSX } from "react";
 import { Navigate } from "react-router-dom";
-import { isTokenExpired } from "../services/auth";
 
-export default function PrivateRoute({ children }: { children: JSX.Element }) {
+type Props = {
+  children: JSX.Element;
+};
+
+export default function PrivateRoute({ children }: Props) {
   const token = localStorage.getItem("token");
-  if (!token || isTokenExpired(token)) return <Navigate to="/" />;
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 }
